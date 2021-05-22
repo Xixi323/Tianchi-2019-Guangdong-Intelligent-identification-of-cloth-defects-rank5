@@ -1,8 +1,8 @@
 import json
 
-json_file1 = "../data/fabric/Annotations/anno_train_20190925.json"
-json_file2 = "../data/fabric/Annotations/anno_train_20191008.json"
-save_json = "../data/fabric/Annotations/anno_train_round2.json"
+json_file1 = "/content/mjcdrive/MyDrive/data/fabric/Annotations/anno_train_20190925.json"
+json_file2 = "/content/mjcdrive/MyDrive/data/fabric/Annotations/anno_train_20191008.json"
+save_json = "/content/mjcdrive/MyDrive/data/fabric/Annotations/anno_train_round2.json"
 with open(json_file1, 'r') as f1:
     anno1 = json.load(f1)
 

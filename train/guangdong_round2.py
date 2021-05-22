@@ -25,28 +25,32 @@ class Fabric2COCO:
 
     def to_coco(self, anno_file, img_dir):
         self._init_categories()
-        anno_result = pd.read_json(open(anno_file,"r"))
-        name_list = anno_result["name"].unique()
-        for img_name in tqdm(name_list):
-            img_anno = anno_result[anno_result["name"] == img_name]
-            if len(img_anno) > 100:
-                print(img_name)
+        anno_result = pd.read_json(open(anno_file,"r"))#读出合并的标签文件round2.json
+        name_list = anno_result["name"].unique()#去除重复元素
+        for img_name in tqdm(name_list):#tqdm：提取数组
+            img_anno = anno_result[anno_result["name"] == img_name]#在做什么？
+            #print(img_anno)
+            if len(img_anno) > 100:#为什么要输出anno长度大于100的图片的名字呢？排除异常
+                # print(img_name)
                 continue
 
-            bboxs = img_anno["bbox"].tolist()
+            bboxs = img_anno["bbox"].tolist()#tolist：转化为列表
             defect_names = img_anno["defect_name"].tolist()
-            assert img_anno["name"].unique()[0] == img_name
+            assert img_anno["name"].unique()[0] == img_name#assert：断言
 
             img_path=os.path.join(img_dir,img_name)
             # img = cv2.imread(img_path)
-            img = Image.open(img_path)
+            img = Image.open(img_path)#调用图片
             #h, w, _ =img.shape
             # h, w = 1696, 4096
             w, h = img.size
-            self.images.append(self._image(img_path, h, w))
+            #print(self.images)
+            self.images.append(self._image(img_path, h, w))#在images里加入一个图片信息的字典{}
+            #print(self.images)
 
-            # self._cp_img(img_path)
+            #self._cp_img(img_path)
 
+            # bbox：矩形框左上角和右下角点的坐标
             for bbox, defect_name in zip(bboxs, defect_names):
                 if bbox[1] >= h:
                     # print(bbox)
@@ -54,7 +58,7 @@ class Fabric2COCO:
                 if bbox[0] >= w:
                     # print(bbox)
                     continue
-                label = defect_name2label[defect_name]
+                label = defect_name2label[defect_name]#label为瑕疵种类的数字编号
                 annotation = self._annotation(label, bbox, h, w)
                 self.annotations.append(annotation)
                 self.ann_id += 1
@@ -80,7 +84,7 @@ class Fabric2COCO:
             category['id'] = v
             category['name'] = k
             category['supercategory'] = 'defect_name'
-            self.categories.append(category)
+            self.categories.append(category)#在categories中加入图片信息字典
 
     def _image(self, path,h,w):
         image = {}
@@ -93,22 +97,26 @@ class Fabric2COCO:
     def _annotation(self,label,bbox,h,w):
         area=(bbox[2]-bbox[0])*(bbox[3]-bbox[1])
         # area=abs(bbox[2]-bbox[0])*abs(bbox[3]-bbox[1])
-        if area <= 0:
-            print(bbox)
-            input()
+        #if area <= 0:
+            #print(bbox)
+            #input()#为什么要输入？应该是作者的测试
+
         points=[[bbox[0],bbox[1]],[bbox[2],bbox[1]],[bbox[2],bbox[3]],[bbox[0],bbox[3]]]
         annotation = {}
         annotation['id'] = self.ann_id
         annotation['image_id'] = self.img_id
         annotation['category_id'] = label
-        annotation['segmentation'] = [np.asarray(points).flatten().tolist()]
-        annotation['bbox'] = self._get_box(points,h,w)
-        annotation['iscrowd'] = 0
+        annotation['segmentation'] = [np.asarray(points).flatten().tolist()]#将points转化为列表
+        #print(points)
+        #print(np.asarray(points).flatten().tolist())
+        annotation['bbox'] = self._get_box(points,h,w)#这时候的bbox才是[x,y,w,h]，矩形框的左上角坐标和长宽
+        annotation['iscrowd'] = 0#代表单个对象，1时代表多个对象
         annotation['area'] = area
+        #print(annotation)
         return annotation
 
     def _get_box(self, points, img_h, img_w):
-        min_x = min_y = np.inf
+        min_x = min_y = np.inf#正无穷大的浮点表示
         max_x = max_y = 0
         for x, y in points:
             min_x = min(min_x, x)
@@ -129,11 +137,11 @@ class Fabric2COCO:
             json.dump(instance, fp, indent=1, separators=(',', ': '))
 
 '''转换有瑕疵的样本为coco格式'''
-img_dir = "../data/fabric/defect_Images"
-anno_dir="../data/fabric/Annotations/anno_train_round2.json"
+img_dir = "/content/mjcdrive/MyDrive/data/fabric/defect_Images"#瑕疵图片目录
+anno_dir="/content/mjcdrive/MyDrive/data/fabric/Annotations/anno_train_round2.json"#合并的标签文件
 fabric2coco = Fabric2COCO()
 train_instance = fabric2coco.to_coco(anno_dir, img_dir)
-fabric2coco.save_coco_json(train_instance, "../data/fabric/annotations/"
+fabric2coco.save_coco_json(train_instance, "/content/mjcdrive/MyDrive/data/fabric/annotations/"
                            +'instances_{}.json'.format("train_20191004_mmd"))
 
 

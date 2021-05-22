@@ -127,11 +127,11 @@ class Fabric2COCO:
             json.dump(instance, fp, indent=1, separators=(',', ': '))
 
 '''转换有瑕疵的样本为coco格式'''
-img_dir = "../data/fabric/defect_Images"
-anno_dir="../data/fabric/Annotations/anno_train_round2.json"
+img_dir = "/content/mjcdrive/MyDrive/data/fabric/defect_Images"
+anno_dir="/content/mjcdrive/MyDrive/data/fabric/Annotations/anno_train_round2.json"
 fabric2coco = Fabric2COCO()
 train_instance = fabric2coco.to_coco(anno_dir, img_dir)
-fabric2coco.save_coco_json(train_instance, "../data/fabric/annotations/"
+fabric2coco.save_coco_json(train_instance, "/content/mjcdrive/MyDrive/data/fabric/annotations/"
                            +'instances_{}.json'.format("train_20191004_mmd_100"))
 
 
