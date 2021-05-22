@@ -1,5 +1,5 @@
 mmcv>=0.2.10
-Cython==0.29.13
+Cython==0.29.14
 numpy
 matplotlib
 six
